@@ -3,9 +3,21 @@ FROM continuumio/miniconda3 as build
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-RUN apt-get update && \
-    apt-get install -y m4 csh jq file build-essential && \
-    rm -rf /var/lib/apt/lists/*
+# Install the bare minimum software requirements on top of trixie-slim
+RUN <<EOT
+apt-get update -qy
+apt-get install -qyy \
+    -o APT::Install-Recommends=false \
+    -o APT::Install-Suggests=false \
+    m4 \
+    csh \
+    jq \
+    file \
+    build-essential
+
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+EOT
 
 COPY environment.yml /opt/environment.yml
 RUN conda env create -f /opt/environment.yml
@@ -27,9 +39,9 @@ COPY scripts /opt/wrf/build/scripts/
 RUN WRF_VERSION=${WRF_VERSION} WPS_VERSION=${WPS_VERSION} bash /opt/wrf/build/scripts/build_wrf.sh
 
 
-FROM debian:bookworm AS runtime
+FROM debian:trixie-slim AS runtime
 
-MAINTAINER Jared Lewis <jared.lewis@climate-resource.com>
+MAINTAINER Lindsay Gaines <lindsay.gaines@superpowerinstitute.com.au>
 
 ARG WRF_VERSION=4.5.1
 ARG WPS_VERSION=4.5
