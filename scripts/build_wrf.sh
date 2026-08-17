@@ -80,11 +80,12 @@ if [ ! -f WPS-${WPS_VERSION}/wps.exe ]; then
   # Add some compiler options for aarch64 (based on x86_64)
   cat /opt/wrf/build/scripts/configure.aarch64 >> arch/configure.defaults
 
-  # option 2 = serial/gfortran/NO_GRIB2.
-  # Jasper isn't packaged in Debian trixie, but WPS's default configure enables
-  # JPEG2000 support, so ungrib.exe fails to link when jasper libs are missing.
-  # NO_GRIB2 skips that dependency entirely.
-  echo "2" | ./configure # serial + gfortran, NO_GRIB2
+  # option 1 = serial/gfortran/GRIB2. Without GRIB2 support, ungrib.exe refuses
+  # to decode Grib Edition 2 data (most current GFS/ERA5 sources) with
+  # NEED_GRIB2_LIBS. $JASPERLIB/$JASPERINC (set in the Dockerfile) point
+  # ./configure at the Jasper build from the jasper-builder stage, so this
+  # picks up real JPEG2000 + PNG support, matching an unmodified WPS build.
+  echo "1" | ./configure # serial + gfortran, GRIB2
 
   # See the GCC14_COMPAT_CFLAGS note above - WPS's own cio.c hits the same
   # implicit-function-declaration/implicit-int errors, and configure.wps's
