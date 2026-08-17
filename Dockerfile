@@ -13,17 +13,15 @@ apt-get install -qyy \
     -o APT::Install-Suggests=false \
     ca-certificates \
     build-essential \
-    cmake \
-    wget
+    cmake
 
 apt-get clean
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 EOT
 
 WORKDIR /opt
-RUN wget -nv https://github.com/jasper-software/jasper/releases/download/version-${JASPER_VERSION}/jasper-${JASPER_VERSION}.tar.gz -O jasper.tar.gz \
-    && tar -xzf jasper.tar.gz \
-    && rm jasper.tar.gz
+ADD https://github.com/jasper-software/jasper/releases/download/version-${JASPER_VERSION}/jasper-${JASPER_VERSION}.tar.gz /opt/jasper.tar.gz
+RUN tar -xzf jasper.tar.gz && rm jasper.tar.gz
 
 # Build a static library only - WPS links it into ungrib.exe directly, so
 # there's no need to ship a shared libjasper in the runtime image.
