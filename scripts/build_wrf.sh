@@ -92,6 +92,15 @@ if [ ! -f WPS-${WPS_VERSION}/wps.exe ]; then
   # CFLAGS for this arch starts out empty (no "-w" to interact with).
   sed -i "s/\(^CFLAGS[[:space:]]*=\)[[:space:]]*$/\1 ${GCC14_COMPAT_CFLAGS}/" configure.wps
 
+  # WPS 4.2-4.6 reads an uninitialised local (is_subgrid_var) when building
+  # metgrid's output field list; under gfortran 14 every field is discarded and
+  # metgrid writes empty met_em files while reporting success. Fixed in WPS 4.7.0.
+  sed -i -E "s/^(FFLAGS|F77FLAGS)([[:space:]]*=.*)$/\\1\\2 -finit-logical=false/" configure.wps
+
+  # Fail loudly rather than silently building a metgrid.exe that writes nothing.
+  grep -qE "^FFLAGS[[:space:]]*=.*-finit-logical=false" configure.wps \
+    || { echo "Failed to patch FFLAGS in configure.wps"; exit 1; }
+
   ./compile
   popd
   ln -s WPS-${WPS_VERSION} WPS
