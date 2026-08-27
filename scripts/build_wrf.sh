@@ -14,7 +14,6 @@ WPS_VERSION="${WPS_VERSION:-4.5}"
 # never passes -usenetcdf=/-usenetcdff= to Config.pl). Without this,
 # real.exe/wrf.exe fail to link with "undefined reference to nf_*".
 export NETCDF_LDFLAGS="$(nf-config --flibs)"
-#export CPPFLAGS=
 export CC=gcc
 export CXX=g++
 export FC=gfortran
@@ -23,8 +22,6 @@ export F77=gfortran
 export FFLAGS="-m64  -fallow-argument-mismatch"
 export NETCDF=$(nc-config --prefix)
 export NETCDF4=1
-#export JASPERLIB=
-#export JASPERINC=
 export J="-j 8"
 export ARCH=$(uname -m)
 
